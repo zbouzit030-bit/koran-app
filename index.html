@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="description" content="تطبيق القرآن الكريم المتقدم - يعمل بدون إنترنت مع أوقات الصلاة والأذكار">
+    <meta name="theme-color" content="#c1a35f">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="القرآن">
+    
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect fill='%23c1a35f' width='100' height='100'/><text x='50' y='80' font-size='80' text-anchor='middle' fill='%231a2a22'>📖</text></svg>">
+    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'><rect fill='%23c1a35f' width='180' height='180'/><text x='90' y='140' font-size='140' text-anchor='middle' fill='%231a2a22'>📖</text></svg>">
+    
+    <title>تطبيق القرآن الكريم الشامل</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="container">
+    <!-- Resume Card -->
+    <div id="resumeCard" class="resume-card" style="display: none;">
+        <h3>👋 أهلاً بعودتك!</h3>
+        <p>آخر موضع وقفت عنده: <strong id="resumeSurahName"></strong></p>
+        <p id="resumeAyahInfo" style="font-size: 0.9rem; color: #bbb;"></p>
+        <div class="resume-buttons">
+            <button onclick="resumeReading()">📖 المتابعة من حيث توقفت</button>
+            <button onclick="dismissResume()">✕ إغلاق</button>
+        </div>
+    </div>
+
+    <!-- Header -->
+    <div class="header">
+        <h1>📖 القرآن الكريم الشامل</h1>
+        <p>تطبيق إسلامي متقدم - يعمل بدون إنترنت 📱</p>
+    </div>
+    
+    <!-- Prayer Countdown -->
+    <div id="prayerCountdown" class="prayer-countdown" style="display: none;">
+        <div id="nextPrayerName"></div>
+        <div class="countdown-timer" id="countdownTimer">--:--:--</div>
+    </div>
+
+    <!-- Offline Indicator -->
+    <div class="offline-indicator" id="offlineIndicator">
+        ⚠️ بدون إنترنت - يعمل بالذاكرة المحفوظة
+    </div>
+
+    <!-- Top Bar Settings -->
+    <div class="top-bar">
+        <div class="settings-group">
+            <button onclick="toggleTheme('dark')" class="theme-btn" title="داكن">🌙</button>
+            <button onclick="toggleTheme('light')" class="theme-btn" title="فاتح">☀️</button>
+            <button onclick="toggleTheme('oled')" class="theme-btn" title="OLED">🖤</button>
+        </div>
+
+        <div class="settings-group">
+            <label class="toggle-switch">
+                <input type="checkbox" id="dataSaverToggle" onchange="toggleDataSaver()">
+                <span class="toggle-indicator">💾 توفير البيانات</span>
+            </label>
+            <label class="toggle-switch">
+                <input type="checkbox" id="autoPlayToggle" onchange="toggleAutoPlay()">
+                <span class="toggle-indicator">▶️ تشغيل متتالي</span>
+            </label>
+            <label class="toggle-switch">
+                <input type="checkbox" id="focusModeToggle" onchange="toggleFocusMode()">
+                <span class="toggle-indicator">🎯 وضع التركيز</span>
+            </label>
+        </div>
+    </div>
+
+    <!-- Khatma Progress -->
+    <div class="progress-section">
+        <div class="progress-label">
+            <span>📊 تقدم الختمة</span>
+            <span id="progressPercent">0%</span>
+        </div>
+        <div class="progress-bar">
+            <div class="progress-fill" id="progressFill" style="width: 0%;">
+                <span id="progressText"></span>
+            </div>
+        </div>
+        <p style="font-size: 0.9rem; color: #aaa; margin-top: 10px;">
+            قرأت: <strong id="readSurahs">0</strong> سورة | متبقي: <strong id="remainSurahs">114</strong> سورة
+        </p>
+    </div>
+
+    <!-- Hasanat Display -->
+    <div class="hasanat-display">
+        <div>حسناتك 🤝</div>
+        <div class="hasanat-number" id="hasanatCount">0</div>
+        <small>بناءً على عدد الحروف المقروءة × 10</small>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs">
+        <button class="tab-btn active" onclick="switchTab('quran')">📕 القرآن</button>
+        <button class="tab-btn" onclick="switchTab('tafseer')">📚 التفسير</button>
+        <button class="tab-btn" onclick="switchTab('memorize')">🧠 حفظ</button>
+        <button class="tab-btn" onclick="switchTab('azkar')">📿 الأذكار</button>
+        <button class="tab-btn" onclick="switchTab('prayer')">🕌 الصلاة</button>
+        <button class="tab-btn" onclick="switchTab('search')">🔍 بحث</button>
+        <button class="tab-btn" onclick="switchTab('favorites')">⭐ المفضلة</button>
+        <button class="tab-btn" onclick="switchTab('stats')">📊 الإحصائيات</button>
+    </div>
+    
+    <!-- Tab: Quran -->
+    <div id="quran" class="tab-content active">
+        <div class="controls">
+            <div class="controls-group">
+                <button onclick="decreaseFont()">🔍 تصغير</button>
+                <span style="color: var(--gold);">حجم: <span id="fontSize">1.8</span>rem</span>
+                <button onclick="increaseFont()">🔍 تكبير</button>
+            </div>
+            <div class="controls-group">
+                <select id="surahSelect" onchange="getSurah(this.value)">
+                    <option value="">اختر السورة...</option>
+                </select>
+            </div>
+            <div class="controls-group" id="readerSelectGroup">
+                <select id="readerSelect" onchange="changeReader()">
+                    <option value="128">مشاري العفاسي</option>
+                    <option value="1">عبد الباسط</option>
+                    <option value="2">محمود خليل</option>
+                    <option value="7">ياسين الجزائري</option>
+                </select>
+            </div>
+        </div>
+
+        <div id="content">
+            <h2 class="surah-title" id="surahName"></h2>
+            <div id="ayatsContainer"></div>
+        </div>
+
+        <audio id="audioPlayer" controls class="audio-player"></audio>
+        <p style="font-size: 0.9rem; color: #999; margin-top: 15px; text-align: center;">💡 اضغط مزدوج على الآية لوضع التركيز | اضغط على الآية لإضافتها للمفضلة</p>
+    </div>
+
+    <!-- Tab: Tafseer -->
+    <div id="tafseer" class="tab-content">
+        <div class="controls">
+            <div class="controls-group">
+                <select id="tafseerSurahSelect" onchange="loadTafseerSurah(this.value)">
+                    <option value="">اختر السورة للتفسير...</option>
+                </select>
+            </div>
+        </div>
+        <div id="tafseerContainer"></div>
+    </div>
+
+    <!-- Tab: Memorization -->
+    <div id="memorize" class="tab-content">
+        <div class="controls">
+            <div class="controls-group">
+                <select id="memorizesurahSelect" onchange="loadMemorizeSurah(this.value)">
+                    <option value="">اختر السورة للحفظ...</option>
+                </select>
+            </div>
+        </div>
+        <div id="memorizeContainer"></div>
+    </div>
+
+    <!-- Tab: Azkar -->
+    <div id="azkar" class="tab-content">
+        <div style="display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; justify-content: center;">
+            <button class="tab-btn active" onclick="switchAzkarCategory('morning')">🌅 صباح</button>
+            <button class="tab-btn" onclick="switchAzkarCategory('evening')">🌙 مساء</button>
+            <button class="tab-btn" onclick="switchAzkarCategory('prayer')">🕌 بعد الصلاة</button>
+            <button class="tab-btn" onclick="switchAzkarCategory('sleep')">😴 نوم</button>
+        </div>
+        <div id="azkarContainer"></div>
+    </div>
+
+    <!-- Tab: Prayer Times -->
+    <div id="prayer" class="tab-content">
+        <button onclick="getPrayerTimes()" style="margin-bottom: 20px;">📍 تحديث أوقات الصلاة</button>
+        <div id="prayerTimesContainer"></div>
+    </div>
+
+    <!-- Tab: Search -->
+    <div id="search" class="tab-content">
+        <input type="text" id="searchInput" class="search-box" placeholder="ابحث عن آية..." onkeyup="searchAyahs()" style="width: 100%; padding: 12px; margin-bottom: 20px; border-radius: 5px;">
+        <div id="searchResults"></div>
+    </div>
+
+    <!-- Tab: Favorites -->
+    <div id="favorites" class="tab-content">
+        <button onclick="clearFavorites()" style="margin-bottom: 20px;">🗑️ حذف الكل</button>
+        <div id="favoritesList" class="favorites-list"></div>
+    </div>
+
+    <!-- Tab: Statistics -->
+    <div id="stats" class="tab-content">
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-number" id="totalSurahs">114</div>
+                <div class="stat-label">السور</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="totalAyahs">6236</div>
+                <div class="stat-label">الآيات</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="favCount">0</div>
+                <div class="stat-label">المفضلة</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="characterCount">0</div>
+                <div class="stat-label">الحروف المقروءة</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Focus Mode Overlay -->
+<div id="focusModeOverlay" class="focus-mode-overlay">
+    <div class="focus-ayah" id="focusAyahText"></div>
+    <div class="focus-controls">
+        <button class="focus-btn" onclick="previousAyahFocus()">⬅️ السابقة</button>
+        <button class="focus-btn" onclick="toggleFocusMode()">✕ خروج</button>
+        <button class="focus-btn" onclick="nextAyahFocus()">➡️ التالية</button>
+    </div>
+</div>
+
+<!-- Scripts -->
+<script src="data.js"></script>
+<script src="utils.js"></script>
+<script src="app.js"></script>
+
+</body>
+</html>
